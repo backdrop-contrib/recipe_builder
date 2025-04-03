@@ -1,0 +1,50 @@
+#recipe-builder-build-form > div {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1rem;
+}
+
+#edit-info {
+  height: fit-content;
+  margin: 0;
+}
+
+#edit-components {
+  grid-row-start: 1;
+  grid-row-end: 4;
+  grid-column-start: 2;
+  height: fit-content;
+  margin: 0;
+}
+
+#edit-actions {
+  height: fit-content;
+  margin: 0;
+  position: sticky;
+  top: 3rem;
+}
+
+#edit-configuration div.form-wrapper {
+  padding: 1rem;
+  margin: 0;
+}
+
+#edit-configuration div.form-wrapper:nth-of-type(2n) {
+  background-color: #eee;
+}
+
+#edit-configuration div.form-wrapper .form-type-checkbox {
+  margin: 0;
+}
+
+.status-new label {
+  color: green;
+}
+
+.status-deleted label {
+  color: red;
+}
+
+.status-changed label {
+  color: blue;
+}

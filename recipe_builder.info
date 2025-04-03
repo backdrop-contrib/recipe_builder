@@ -1,0 +1,5 @@
+name = Recipe Builder
+description = A module to help build modules to be used as Recipes.
+backdrop = 1.x
+type = module
+
