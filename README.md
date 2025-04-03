@@ -1,6 +1,8 @@
 Recipe Builder
 ========
 
+**This is an experimental module that is still in development.**
+
 This module provides tools and a UI for creating modules that bundle prebuilt
 config and content for easy reuse.
 
