@@ -34,7 +34,7 @@ function recipe_builder_menu() {
     'title' => 'Create Recipe',
     'page callback' => 'backdrop_get_form',
     'page arguments' => ['recipe_builder_build_form'],
-    'access arguments' => array('use recipe_builder'),
+    'access arguments' => array('use recipe builder'),
     'file' => 'recipe_builder.builder.inc',
     'type' => MENU_LOCAL_ACTION,
   ];
@@ -47,7 +47,7 @@ function recipe_builder_menu() {
  */
 function recipe_builder_permission() {
   return [
-    'build recipes' =>  [
+    'use recipe builder' =>  [
       'title' => t('Use recipe builder'),
       'description' => t('Create or edit Recipes using the Recipe Builder module.'),
       'restrict access' => TRUE,
