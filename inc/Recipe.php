@@ -13,11 +13,11 @@ class Recipe {
   public $components = [];
 
   public function get_components() {
-    if (empty($this->componenets)) {
+    if (empty($this->components)) {
       // idk
     }
 
-    return $this->componenets;
+    return $this->components;
   }
 
   public function get_info() {}

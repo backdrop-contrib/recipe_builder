@@ -287,6 +287,17 @@ function recipe_builder_build_form_validate($form, &$form_state) {
 function recipe_builder_build_form_submit($form, &$form_state) {
   if (isset($form_state['input']['op'])) {
 
+    // Check if 'cancel_build_mode' is set before accessing it.
+    if (isset($form_state['input']['cancel_build_mode']) && $form_state['input']['op'] === $form_state['values']['cancel_build_mode']) {
+      // Clean up recipe builder data.
+      state_set('recipe_builder_build_mode', FALSE);
+
+      tempstore_clear_all('recipe_builder_build_mode');
+
+      $storage = config_get_config_storage('recipe_builder');
+      $storage->deleteAll();
+    }
+
     // Save module info into tempstore.
     if ($form_state['input']['op'] === $form_state['values']['start_build_mode']
       || $form_state['input']['op'] === $form_state['values']['save']) {
@@ -377,18 +388,6 @@ function recipe_builder_build_form_submit($form, &$form_state) {
         }
       }
     }
-
-    // Clean up recipe builder data.
-    if ($form_state['input']['op'] === $form_state['values']['cancel_build_mode']
-      || $form_state['input']['op'] === $form_state['values']['save']) {
-      state_set('recipe_builder_build_mode', FALSE);
-
-      tempstore_clear_all('recipe_builder_build_mode');
-
-      $storage = config_get_config_storage('recipe_builder');
-      $storage->deleteAll();
-    }
-
   }
 
 //  dpm(__FUNCTION__);
