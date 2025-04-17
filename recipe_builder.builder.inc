@@ -12,10 +12,15 @@ function recipe_builder_build_form($form, &$form_state, $recipe = NULL) {
     }
   }
 
+  // Ensure the $recipe object is initialized.
+  if (empty($recipe)) {
+    $recipe = new Recipe();
+  }
+
 //  dpm($recipe);
 
   $form = array(
-    '#recipe' => isset($recipe) ? $recipe : new Recipe(),
+    '#recipe' => $recipe,
   );
 
   $form['info'] = [
