@@ -98,7 +98,7 @@ function recipe_builder_build_form($form, &$form_state, $recipe = NULL) {
     '#title' => t('Actions'),
   ];
 
-  if (isset($config_directories['recipe_builder']) && !empty($config_directories['recipe_builder'])) {
+  if (!empty($config_directories['recipe_builder'])) {
     if (state_get('recipe_builder_build_mode', FALSE)) {
       $form['actions']['cancel_build_mode'] = [
         '#type' => 'submit',
@@ -143,7 +143,7 @@ function _recipe_builder_build_form_components(&$form, &$form_state) {
   // Get existing components from the recipe.
   $components = $recipe->get_components();
 
-  // Get componenets from build mode.
+  // Get components from build mode.
   if (state_get('recipe_builder_build_mode', FALSE)) {
     // Configuration.
     $config_status = _recipe_builder_get_config_status();
@@ -195,10 +195,12 @@ function _recipe_builder_build_form_components(&$form, &$form_state) {
       if (!empty($recipe->components['configuration']) && in_array($file, $recipe->components['configuration'])) {
         $form['components']['configuration'][$file][$file]['checked'] = TRUE;
       }
-      foreach ($components['dependencies'] as $module) {
-        if (_recipe_builder_check_default_config($module, $file)) {
-          $form['components']['configuration'][$file][$file]['#description'] = t('Added by @module.', ['@module' => $module]);
-          break;
+      if (isset($components['dependencies'])) {
+        foreach ($components['dependencies'] as $module) {
+          if (_recipe_builder_check_default_config($module, $file)) {
+            $form['components']['configuration'][$file][$file]['#description'] = t('Added by @module.', ['@module' => $module]);
+            break;
+          }
         }
       }
 
@@ -270,7 +272,8 @@ function recipe_builder_build_form_validate($form, &$form_state) {
 //  dpm($form_state);
 
   if (isset($form_state['input']['op'])) {
-    if ($form_state['input']['op'] === $form_state['values']['start_build_mode']) {
+    if (isset($form_state['values']['start_build_mode'])
+      && $form_state['input']['op'] === $form_state['values']['start_build_mode']) {
       // Make sure that recipe_builder storage exists, is writable, and is empty.
     }
     if ($form_state['input']['op'] === $form_state['values']['save']) {
@@ -288,7 +291,8 @@ function recipe_builder_build_form_submit($form, &$form_state) {
   if (isset($form_state['input']['op'])) {
 
     // Save module info into tempstore.
-    if ($form_state['input']['op'] === $form_state['values']['start_build_mode']
+    if ((isset($form_state['values']['start_build_mode'])
+      && $form_state['input']['op'] === $form_state['values']['start_build_mode'])
       || $form_state['input']['op'] === $form_state['values']['save']) {
       $recipe = $form['#recipe'];
 
@@ -302,7 +306,8 @@ function recipe_builder_build_form_submit($form, &$form_state) {
     }
 
     // Start build mode.
-    if ($form_state['input']['op'] === $form_state['values']['start_build_mode']) {
+    if (isset($form_state['values']['start_build_mode'])
+      && $form_state['input']['op'] === $form_state['values']['start_build_mode']) {
       $active_storage =  config_get_config_storage('active');
       $active_files = $active_storage->listAll();
 
@@ -332,9 +337,11 @@ function recipe_builder_build_form_submit($form, &$form_state) {
       ];
 
       // Process dependencies.
-      foreach ($form_state['input']['dependencies'] as $module_name => $value) {
-        if ($value) {
-          $recipe->info['dependencies'][] = $module_name;
+      if (isset($form_state['input']['dependencies'])) {
+        foreach ($form_state['input']['dependencies'] as $module_name => $value) {
+          if ($value) {
+            $recipe->info['dependencies'][] = $module_name;
+          }
         }
       }
 
