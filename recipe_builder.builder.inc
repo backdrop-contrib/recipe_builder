@@ -251,7 +251,7 @@ function _recipe_builder_build_form_components(&$form, &$form_state) {
       '#type' => 'fieldset',
       '#tree' => TRUE,
       '#title' => t('Dependencies'),
-      '#description' => t('The selected modules will be added as dependencies of the Recipe.'),
+      '#description' => t('Check the box for each module to be added as a dependency of this recipe.'),
     ];
     foreach ($components['dependencies'] as $module_name) {
       $module_info = system_get_info('module', $module_name);
@@ -264,21 +264,57 @@ function _recipe_builder_build_form_components(&$form, &$form_state) {
       }
     }
   }
+
+  if (!empty($components)) {
+    $form['components']['#description'] = t('Check the box for each configuration change you want to save in this recipe.');
+  }
 }
 
 function recipe_builder_build_form_validate($form, &$form_state) {
-//  dpm($form_state);
-
   if (isset($form_state['input']['op'])) {
-    if ($form_state['input']['op'] === $form_state['values']['start_build_mode']) {
+    // Don't attempt to save the recipe if the build mode hasn't been started.
+    if ($form_state['values']['op'] === $form_state['values']['save']
+      && isset($form_state['values']['start_build_mode'])) {
+      form_set_error('', t('You need to start the build mode and make one or more changes before you can save a recipe.'));
+    }
+
+    if (isset($form_state['values']['start_build_mode'])
+      && $form_state['input']['op'] === $form_state['values']['start_build_mode']) {
       // Make sure that recipe_builder storage exists, is writable, and is empty.
     }
+
     if ($form_state['input']['op'] === $form_state['values']['save']) {
       $path = !empty($form_state['values']['path']) ? $form_state['values']['path'] : 'modules/' . $form_state['values']['module_name'];
 
       $writable = file_prepare_directory($path, FILE_CREATE_DIRECTORY);
       if (!$writable) {
         form_set_error('path', t('The module directory could not be created or is not writable.'));
+      }
+
+      // See if anything was checked to save.
+      $component_groups = [
+        'configuration',
+        'dependencies',
+      ];
+      $empty_component_groups = 0;
+      $components_selected = 0;
+      foreach ($component_groups as $component_group) {
+        if (empty($form_state['values'][$component_group])) {
+          $empty_component_groups++;
+        }
+        else {
+          foreach ($form_state['values'][$component_group] as $enabled) {
+            if ($enabled) {
+              $components_selected++;
+            }
+          }
+        }
+      }
+      if ($empty_component_groups == 2) {
+        form_set_error('', t('No configuration or dependency changes were made, so there is nothing to save.'));
+      }
+      elseif (!$components_selected) {
+        form_set_error('', t('No components were selected to save. Check the boxes of one or more Configuration changes and/or one or more Dependencies to save the recipe.'));
       }
     }
   }
