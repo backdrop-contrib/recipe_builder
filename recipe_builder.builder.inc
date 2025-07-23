@@ -398,7 +398,7 @@ function recipe_builder_build_form_submit($form, &$form_state) {
 }
 
 /**
- * Rmoves any recipe builder data saved in tempstore.
+ * Removes any recipe builder data saved in tempstore.
  *
  * @return void
  */
