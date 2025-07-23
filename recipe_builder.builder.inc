@@ -341,11 +341,19 @@ function recipe_builder_build_form_submit($form, &$form_state) {
       $info_output = recipe_builder_export_info(array_merge($info_defaults, $recipe->info));
 
       $info_path = $recipe->path . '/' . $recipe->name . '.info';
-      file_put_contents($info_path, $info_output);
+      if (file_put_contents($info_path, $info_output) === FALSE) {
+        $message = t('There was an error saving the .info file.');
+        backdrop_set_message($message, 'error');
+        return;
+      }
 
       // Create a .module file.
       if (!file_exists($recipe->path . '/' . $recipe->name . '.module')) {
-        file_put_contents($recipe->path . '/' . $recipe->name . '.module', '');
+        if (file_put_contents($recipe->path . '/' . $recipe->name . '.module', '') === FALSE) {
+          $message = t('There was an error saving the .module file.');
+          backdrop_set_message($message, 'error');
+          return;
+        }
       }
 
       // Process config files.
@@ -376,25 +384,29 @@ function recipe_builder_build_form_submit($form, &$form_state) {
           }
         }
       }
+
+      _recipe_builder_clean_data();
     }
 
     // Clean up recipe builder data.
-    if ($form_state['input']['op'] === $form_state['values']['cancel_build_mode']
-      || $form_state['input']['op'] === $form_state['values']['save']) {
-      state_set('recipe_builder_build_mode', FALSE);
-
-      tempstore_clear_all('recipe_builder_build_mode');
-
-      $storage = config_get_config_storage('recipe_builder');
-      $storage->deleteAll();
+    if (isset($form_state['values']['cancel_build_mode'])
+        && $form_state['input']['op'] === $form_state['values']['cancel_build_mode']) {
+      _recipe_builder_clean_data();
     }
 
   }
+}
 
-//  dpm(__FUNCTION__);
-//  dpm($form_state['input']['op']);
-//  dpm($form, '$form');
-//  dpm($form_state, '$form_state');
+/**
+ * Rmoves any recipe builder data saved in tempstore.
+ *
+ * @return void
+ */
+function _recipe_builder_clean_data() {
+  state_set('recipe_builder_build_mode', FALSE);
+  tempstore_clear_all('recipe_builder_build_mode');
+  $storage = config_get_config_storage('recipe_builder');
+  $storage->deleteAll();
 }
 
 function _recipe_builder_get_config_status($config = NULL) {
